@@ -1,7 +1,7 @@
 
 # Retrieve the Book instance
 '''python
-from myapp.model import book
+from bookshelf.model import book
 
 #Retrieve the created Book
 
