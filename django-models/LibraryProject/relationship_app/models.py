@@ -1,4 +1,7 @@
+from django import forms
 from django.db import models
+
+
 
 
 # Create your models here.
@@ -15,6 +18,12 @@ class Book(models.Model):
 
     def __str__(self):
         return self.title
+    class Meta:
+        permissions = (
+            ("can_add_book", "Can add book"),
+            ("can_change_book", "Can change book"),
+            ("can_delete_book", "Can delete book")
+        )
 
 class Library(models.Model):
     name = models.CharField(max_length=100)
@@ -36,3 +45,5 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.role}"
+    
+    # BookForm should be defined outside the UserProfile model
