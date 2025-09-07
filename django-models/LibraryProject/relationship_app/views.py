@@ -30,9 +30,4 @@ def register(request):
     else:
         form = UserCreationForm()
     return render(request, 'relationship_app/register.html', {'form': form})
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        # Log the user in after successful registration
-        login(self.request, self.object)
-        return response
 
