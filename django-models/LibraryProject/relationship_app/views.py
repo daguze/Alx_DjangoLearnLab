@@ -9,10 +9,9 @@ from django.views.generic.detail import DetailView
 
 def list_books(request):
     books = Book.objects.all()
-    book_list = [f"{book.title} by {book.author.name}" for book in books]
-    return render(request, "relationship_app/list_books.html", {"books": book_list})
+    return render(request, "relationship_app/list_books.html", {"books": books})
 
-class libraryDetailview(DetailView):
+class LibraryDetailView(DetailView):
     model = Library
     template_name = 'relationship_app/library_detail.html'
     context_object_name = 'library'
