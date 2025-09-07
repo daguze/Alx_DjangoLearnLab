@@ -13,7 +13,7 @@ def books_in_library(library_name):
     return [book.title for book in books]
 def librarians_in_library(library_name):
     library = Library.objects.get(name=library_name)
-    librarian = library.librarian
+    librarian = Librarian.objects.get(library=library)
     return librarian.name
 
 if __name__ == "__main__":
