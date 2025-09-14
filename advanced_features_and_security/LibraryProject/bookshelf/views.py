@@ -23,3 +23,10 @@ def delete_book(request, book_id):
     books = Book.objects.all()
     book.delete()
     return redirect('list_books')
+
+from django.http import HttpResponse
+
+def my_view(request):
+    response = HttpResponse("Hello CSP!")
+    response['Content-Security-Policy'] = "default-src 'self'; script-src 'self'"
+    return response
