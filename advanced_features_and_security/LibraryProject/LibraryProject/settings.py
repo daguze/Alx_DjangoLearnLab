@@ -141,3 +141,19 @@ AUTH_USER_MODEL = 'bookshelf.CustomUser'
 
 LOGIN_REDIRECT_URL = 'list_books'
 LOGOUT_REDIRECT_URL = '/'
+
+
+# Redirect all HTTP requests to HTTPS
+SECURE_SSL_REDIRECT = True
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True 
+
+# Ensure session cookies are only sent over HTTPS
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+# Prevent site from being framed (clickjacking protection)
+X_FRAME_OPTIONS = 'DENY'
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
