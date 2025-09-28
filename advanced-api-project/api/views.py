@@ -72,3 +72,18 @@ class BookDeleteView(generics.DestroyAPIView):
         if not (user.is_staff or user.is_superuser):
             raise PermissionDenied("Only staff can delete books in this environment.")
         instance.delete()
+
+class BookUpdateByQueryView(BookUpdateView):
+    
+    def get_object(self):
+        pk = self.request.query_params.get('id') or self.request.data.get('id')
+        if not pk:
+
+            return f'please give a real id'
+
+
+class BookDeleteByQueryView(BookDeleteView):
+    def get_object(self):
+        pk = self.request.query_params.get('id') or self.request.data.get('id')
+        if not pk:
+            return f'please give a real id'
