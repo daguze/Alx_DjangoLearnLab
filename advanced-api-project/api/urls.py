@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import (BookListView,BookDetailView,BookCreateView,BookUpdateView,BookDeleteView,BookUpdateByQueryView,BookDeleteByQueryView)
 
+app_name = "api"
 urlpatterns = [
     
     path('books/', BookListView.as_view(), name='book-list'),
