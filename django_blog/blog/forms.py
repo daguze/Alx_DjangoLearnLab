@@ -52,10 +52,7 @@ class PostForm(forms.ModelForm):
                 "rows": 10,
                 "placeholder": "Write your post..."
             }),
-            "tags": TagWidget(attrs={             # ✅ this line is what the checker looks for
-                "class": "form-control",
-                "placeholder": "Add tags separated by commas"
-            }),
+            "tags": TagWidget()
         }
 
 class CommentForm(forms.ModelForm):
