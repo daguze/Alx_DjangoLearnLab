@@ -8,7 +8,8 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .forms import PostForm
 from .models import Post
-
+from .forms import PostForm, CommentForm
+from .models import Post, Comment
 
 
 def post_list(request):
@@ -118,3 +119,72 @@ class PostDeleteView(LoginRequiredMixin, AuthorRequiredMixin, DeleteView):
     model = Post
     template_name = "blog/post_confirm_delete.html"
     success_url = reverse_lazy("blog:post-list")
+
+class PostDetailView(DetailView):
+    model = Post
+    template_name = "blog/post_detail.html"
+    context_object_name = "post"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        post = self.object
+        ctx["comments"] = post.comments.select_related("author").all()
+        ctx["comment_form"] = CommentForm() if self.request.user.is_authenticated else None
+        return ctx
+
+
+# --- Comments ---
+
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = "blog/comment_form.html"  # not used when posting from detail, but kept for completeness
+
+    def dispatch(self, request, *args, **kwargs):
+        self.post_obj = get_object_or_404(Post, pk=kwargs["post_id"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        form.instance.post = self.post_obj
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return self.post_obj.get_absolute_url() + "#comments"
+
+
+class CommentAuthorRequiredMixin(UserPassesTestMixin):
+    def test_func(self):
+        return self.get_object().author == self.request.user
+
+
+class CommentUpdateView(LoginRequiredMixin, CommentAuthorRequiredMixin, UpdateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = "blog/comment_form.html"
+
+    def get_success_url(self):
+        return self.object.post.get_absolute_url() + "#comments"
+
+
+class CommentDeleteView(LoginRequiredMixin, CommentAuthorRequiredMixin, DeleteView):
+    model = Comment
+    template_name = "blog/comment_confirm_delete.html"
+
+    def get_success_url(self):
+        return self.object.post.get_absolute_url() + "#comments"
+
+
+# Optional: separate list page for a post’s comments (not required if you show them on PostDetail)
+class CommentListView(ListView):
+    model = Comment
+    template_name = "blog/comment_list.html"
+    context_object_name = "comments"
+
+    def get_queryset(self):
+        return Comment.objects.select_related("author", "post").filter(post_id=self.kwargs["post_id"])
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["post"] = get_object_or_404(Post, pk=self.kwargs["post_id"])
+        return ctx
