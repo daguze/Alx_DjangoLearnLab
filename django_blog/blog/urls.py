@@ -3,12 +3,10 @@ from django.urls import path
 from . import views
 from .views import (
     PostListView, PostDetailView, PostCreateView,
-    PostUpdateView, PostDeleteView,CommentCreateView, CommentUpdateView, CommentDeleteView, CommentListView)
+    PostUpdateView, PostDeleteView,CommentCreateView, CommentUpdateView, CommentDeleteView, CommentListView,TagPostListView, PostSearchView)
 urlpatterns = [
     path('', views.post_list, name='post_list'),
     path('posts/<int:pk>/', views.post_detail, name='post_detail'),
-
-    # auth
     path('login/', views.BlogLoginView.as_view(), name='login'),
     path('logout/', views.BlogLogoutView.as_view(), name='logout'),
     path('register/', views.register, name='register'),
@@ -22,16 +20,14 @@ urlpatterns = [
     path("post/<int:pk>/update/", PostUpdateView.as_view(), name="post-update"),
     path("post/<int:pk>/delete/", PostDeleteView.as_view(), name="post-delete-one"),
     path("posts/<int:post_id>/comments/new/", CommentCreateView.as_view(), name="comment-create"),
-    # Optional list of comments for a post
     path("posts/<int:post_id>/comments/", CommentListView.as_view(), name="comment-list"),
-    # Edit/Delete by comment id
     path("comments/<int:pk>/edit/", CommentUpdateView.as_view(), name="comment-edit"),
     path("comments/<int:pk>/delete/", CommentDeleteView.as_view(), name="comment-delete"),
-
-    # Singular alternates (in case tests expect these names)
     path("post/<int:pk>/comments/new/", CommentCreateView.as_view(), name="comment-new"),
     path("comment/<int:pk>/update/", CommentUpdateView.as_view(), name="comment-update"),
     path("comment/<int:pk>/delete/", CommentDeleteView.as_view(), name="comment-delete-one"),
+    path("tags/<slug:slug>/", TagPostListView.as_view(), name="tag-detail"),
+    path("search/", PostSearchView.as_view(), name="post-search"),
 ]
 
 app_name = "blog"

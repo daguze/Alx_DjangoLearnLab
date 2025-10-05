@@ -5,6 +5,8 @@ from .models import Profile
 from .models import Post
 from django import forms
 from .models import Comment
+from django import forms
+from .models import Post, Tag
 
 
 class RegisterForm(UserCreationForm):
@@ -61,3 +63,52 @@ class CommentForm(forms.ModelForm):
         if not data:
             raise forms.ValidationError("Comment cannot be empty.")
         return data
+
+
+class PostForm(forms.ModelForm):
+    tags_csv = forms.CharField(
+        required=False,
+        help_text="Comma-separated tags (e.g. django, python, web)."
+    )
+
+    class Meta:
+        model = Post
+        fields = ["title", "content", "tags_csv"]
+        widgets = {
+            "title": forms.TextInput(attrs={"class": "form-control", "placeholder": "Post title"}),
+            "content": forms.Textarea(attrs={"class": "form-control", "rows": 10, "placeholder": "Write your post..."}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            existing = self.instance.tags.values_list("name", flat=True)
+            self.fields["tags_csv"].initial = ", ".join(existing)
+
+    def _parse_tags(self, raw: str):
+       
+        parts = [t.strip() for t in (raw or "").split(",") if t.strip()]
+        seen_lower = set()
+        ordered = []
+        for p in parts:
+            key = p.lower()
+            if key not in seen_lower:
+                seen_lower.add(key)
+                ordered.append(p)
+        return ordered
+
+    def save(self, commit=True):
+        instance = super().save(commit=commit)
+        tags = self._parse_tags(self.cleaned_data.get("tags_csv", ""))
+
+        
+        tag_objs = []
+        for name in tags:
+            obj, _ = Tag.objects.get_or_create(name=name)
+            tag_objs.append(obj)
+
+        if not instance.pk and commit:
+            instance.save()
+
+        instance.tags.set(tag_objs)
+        return instance

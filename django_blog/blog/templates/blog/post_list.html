@@ -12,6 +12,14 @@
 {% empty %}
   <p>No posts yet.</p>
 {% endfor %}
+{% if post.tags.all %}
+  <p class="muted">
+    {% for t in post.tags.all %}
+      <a href="{% url 'blog:tag-detail' t.slug %}">#{{ t.name }}</a>{% if not forloop.last %} · {% endif %}
+    {% endfor %}
+  </p>
+{% endif %}
+
 
 {% if user.is_authenticated %}
   <a href="{% url 'blog:post-new' %}">Create New Post</a>

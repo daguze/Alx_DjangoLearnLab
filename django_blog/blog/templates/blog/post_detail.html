@@ -36,6 +36,15 @@
     {{ comment_form.as_p }}
     <button type="submit">Post Comment</button>
   </form>
+  <!-- at the bottom of your article block -->
+    {% if post.tags.all %}
+    <p><strong>Tags:</strong>
+        {% for t in post.tags.all %}
+        <a href="{% url 'blog:tag-detail' t.slug %}">#{{ t.name }}</a>{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </p>
+    {% endif %}
+
 {% else %}
   <p><a href="{% url 'login' %}?next={{ request.path }}">Log in</a> to comment.</p>
 {% endif %}

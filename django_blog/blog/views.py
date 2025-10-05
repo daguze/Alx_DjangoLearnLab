@@ -10,7 +10,10 @@ from .forms import PostForm
 from .models import Post
 from .forms import PostForm, CommentForm
 from .models import Post, Comment
-
+from django.db.models import Q
+from django.views.generic import ListView
+from django.shortcuts import get_object_or_404
+from .models import Post, Tag
 
 def post_list(request):
     posts = Post.objects.select_related('author').all()
@@ -175,7 +178,6 @@ class CommentDeleteView(LoginRequiredMixin, CommentAuthorRequiredMixin, DeleteVi
         return self.object.post.get_absolute_url() + "#comments"
 
 
-# Optional: separate list page for a post’s comments (not required if you show them on PostDetail)
 class CommentListView(ListView):
     model = Comment
     template_name = "blog/comment_list.html"
@@ -187,4 +189,53 @@ class CommentListView(ListView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["post"] = get_object_or_404(Post, pk=self.kwargs["post_id"])
+        return ctx
+    
+
+
+from .forms import PostForm 
+class TagPostListView(ListView):
+    model = Post
+    template_name = "blog/tag_post_list.html"
+    context_object_name = "posts"
+    paginate_by = 10
+
+    def get_queryset(self):
+        self.tag = get_object_or_404(Tag, slug=self.kwargs["slug"])
+        return (
+            Post.objects.filter(tags=self.tag)
+            .select_related("author")
+            .prefetch_related("tags")
+        )
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["tag"] = self.tag
+        return ctx
+
+
+class PostSearchView(ListView):
+    model = Post
+    template_name = "blog/post_search_results.html"
+    context_object_name = "posts"
+    paginate_by = 10
+
+    def get_queryset(self):
+        q = self.request.GET.get("q", "").strip()
+        if not q:
+            return Post.objects.none()
+        return (
+            Post.objects.filter(
+                Q(title__icontains=q) |
+                Q(content__icontains=q) |
+                Q(tags__name__icontains=q)
+            )
+            .select_related("author")
+            .prefetch_related("tags")
+            .distinct()
+        )
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["q"] = self.request.GET.get("q", "").strip()
         return ctx
