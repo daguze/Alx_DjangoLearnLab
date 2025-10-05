@@ -2,17 +2,17 @@
 {% block title %}Register — Django Blog{% endblock %}
 {% block content %}
 <h2>Create account</h2>
-<form method="post" novalidate>
-{% csrf_token %}
-{{ form.non_field_errors }}
-{% for field in form %}
-<div class="form-row">
-{{ field.label_tag }} {{ field }}
-{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
-{% for error in field.errors %}<p class="error">{{ error }}</p>{% endfor %}
-</div>
-{% endfor %}
-<button type="submit">Register</button>
-</form>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+            <div class="form-row">
+                {{ field.label_tag }} {{ field }}
+                {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                {% for error in field.errors %}<p class="error">{{ error }}</p>{% endfor %}
+            </div>
+        {% endfor %}
+        <button type="submit">Register</button>
+    </form>
 <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
 {% endblock %}
