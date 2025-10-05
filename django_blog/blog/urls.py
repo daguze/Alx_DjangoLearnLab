@@ -29,9 +29,9 @@ urlpatterns = [
     path("comments/<int:pk>/delete/", CommentDeleteView.as_view(), name="comment-delete"),
 
     # Singular alternates (in case tests expect these names)
-    path("post/<int:post_id>/comments/new/", CommentCreateView.as_view(), name="comment-new"),
+    path("post/<int:pk>/comments/new/", CommentCreateView.as_view(), name="comment-new"),
     path("comment/<int:pk>/update/", CommentUpdateView.as_view(), name="comment-update"),
     path("comment/<int:pk>/delete/", CommentDeleteView.as_view(), name="comment-delete-one"),
 ]
-]
+
 app_name = "blog"
