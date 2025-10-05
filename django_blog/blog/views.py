@@ -239,3 +239,22 @@ class PostSearchView(ListView):
         ctx = super().get_context_data(**kwargs)
         ctx["q"] = self.request.GET.get("q", "").strip()
         return ctx
+class PostByTagListView(ListView):
+    model = Post
+    template_name = "blog/tag_post_list.html"
+    context_object_name = "posts"
+    paginate_by = 10
+
+    def get_queryset(self):
+        self.tag = get_object_or_404(Tag, slug=self.kwargs["tag_slug"])
+        return (
+            Post.objects.filter(tags__in=[self.tag])
+            .select_related("author")
+            .prefetch_related("tags")
+            .distinct()
+        )
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["tag"] = self.tag
+        return ctx
