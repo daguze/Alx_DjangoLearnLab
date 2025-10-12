@@ -1,11 +1,11 @@
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
-from .models import CoustomUser
+from .models import CustomUser
 from django.contrib.auth import get_user_model
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CoustomUser
+        model = CustomUser
         fields = ['id', 'username', 'email', 'bio', 'profile_picture', 'followers']
         read_only_fields = ['id', 'followers']
 
@@ -14,7 +14,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
     class Meta:
-        model = CoustomUser
+        model = CustomUser
         fields = ['id', 'username', 'email', 'password', 'bio', 'profile_picture']
         read_only_fields = ['id']
 
@@ -38,8 +38,8 @@ class LoginSerializer(serializers.Serializer):
 
         if username and password:
             try:
-                user = CoustomUser.objects.get(username=username)
-            except CoustomUser.DoesNotExist:
+                user = CustomUser.objects.get(username=username)
+            except CustomUser.DoesNotExist:
                 raise serializers.ValidationError("Invalid username or password")
 
             if not user.check_password(password):

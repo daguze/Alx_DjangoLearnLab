@@ -3,7 +3,7 @@ from rest_framework import generics, response, status, permissions
 from rest_framework.views import APIView
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
-from .models import CoustomUser
+from .models import CustomUser
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 from posts.models import User 
 
@@ -14,7 +14,7 @@ class RegisterView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         res = super().create(request, *args, **kwargs)
-        user = CoustomUser.objects.get(id=res.data['id'])
+        user = CustomUser.objects.get(id=res.data['id'])
         token = user.auth_token.key
         return response.Response(
             {'user': UserSerializer(user, context={'request': request}).data, 'token': token},
@@ -70,7 +70,7 @@ class UnfollowUserView(APIView):
 
 
 class UserListView(generics.GenericAPIView):
-    queryset = CoustomUser.objects.all()
+    queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
 
