@@ -44,29 +44,67 @@ class ProfileView(APIView):
         return response.Response(ser.data)
 
 
-class FollowUserView(APIView):
+# accounts/views.py
+
+from rest_framework import generics, permissions, status
+from rest_framework.response import Response
+from .models import CustomUser
+
+class FollowUserView(generics.GenericAPIView):
+    """
+    API view to allow a user to follow another user.
+    """
     permission_classes = [permissions.IsAuthenticated]
+    queryset = CustomUser.objects.all() # Defines the set of objects this view can act on.
 
-    def post(self, request, user_id):
-        target_user = get_object_or_404(User, id=user_id)
-        if target_user == request.user:
-            return response.Response({'detail': "You cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request, *args, **kwargs):
+        user_to_follow = self.get_object() # Retrieves user based on 'pk' from URL.
+        user = request.user
 
-        request.user.following.add(target_user)
-        return response.Response({'detail': f'You are now following {target_user.username}.'}, status=status.HTTP_200_OK)
+        if user == user_to_follow:
+            return Response(
+                {"error": "You cannot follow yourself."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if user.following.filter(pk=user_to_follow.pk).exists():
+            return Response(
+                {"error": "You are already following this user."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user.following.add(user_to_follow)
+        
+        # Returns a success message.
+        return Response(
+            {"detail": f"Successfully followed {user_to_follow.username}."},
+            status=status.HTTP_200_OK
+        )
 
 
-class UnfollowUserView(APIView):
+class UnfollowUserView(generics.GenericAPIView):
+    """
+    API view to allow a user to unfollow another user.
+    """
     permission_classes = [permissions.IsAuthenticated]
+    queryset = CustomUser.objects.all()
 
-    def post(self, request, user_id):
-        target_user = get_object_or_404(User, id=user_id)
-        if target_user == request.user:
-            return response.Response({'detail': "You cannot unfollow yourself."}, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request, *args, **kwargs):
+        user_to_unfollow = self.get_object()
+        user = request.user
 
-        request.user.following.remove(target_user)
-        return response.Response({'detail': f'You unfollowed {target_user.username}.'}, status=status.HTTP_200_OK)
-
+        if not user.following.filter(pk=user_to_unfollow.pk).exists():
+            return Response(
+                {"error": "You are not following this user."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        user.following.remove(user_to_unfollow)
+        
+        return Response(
+            {"detail": f"Successfully unfollowed {user_to_unfollow.username}."},
+            status=status.HTTP_200_OK
+        )
 
 
 class UserListView(generics.GenericAPIView):
@@ -80,7 +118,3 @@ class UserListView(generics.GenericAPIView):
         return Response(serializer.data)
 
 
-
-generics.GenericAPIView
-CustomUser.objects.all()
-return Response(serializer.data)
