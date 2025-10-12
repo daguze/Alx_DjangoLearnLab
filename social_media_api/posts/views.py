@@ -1,6 +1,11 @@
 from django.shortcuts import render
-
-# Create your views here.
+from rest_framework import permissions, status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from .models import Post, Like
+from notifications.models import Notification
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import viewsets, permissions, filters
 from rest_framework.pagination import PageNumberPagination
 from .models import Post, Comment
@@ -37,13 +42,6 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-from rest_framework import permissions, status
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
-from .models import Post, Like
-from notifications.models import Notification
-from django.contrib.contenttypes.models import ContentType
 
 
 class LikePostView(APIView):
@@ -51,12 +49,10 @@ class LikePostView(APIView):
 
     def post(self, request, pk):
         post = get_object_or_404(Post, pk=pk)
-        like, created = Like.objects.get_or_create(post=post, user=request.user)
-
-        if not created:
+        Like.objects.get_or_create(user=request.user, post=post)
+        if not Like.objects.filter(post=post, user=request.user).exists():
             return Response({'detail': 'You already liked this post.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Create a notification for the post author
+        
         if post.author != request.user:
             Notification.objects.create(
                 recipient=post.author,
