@@ -15,3 +15,9 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ['id', 'author', 'title', 'content', 'created_at', 'updated_at', 'comments']
+from .models import Like
+
+class LikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = ['id', 'post', 'user', 'created_at']
