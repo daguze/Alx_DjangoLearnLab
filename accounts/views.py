@@ -1,13 +1,14 @@
-from django.shortcuts import render
-
-from posts.models import User
+from django.shortcuts import render, get_object_or_404
+from rest_framework import generics, response, status, permissions
+from rest_framework.views import APIView
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.response import Response
 from .models import CoustomUser
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
-from rest_framework.views import APIView
-from rest_framework import generics, response, status, permissions
-from rest_framework.authentication import TokenAuthentication
-from django.shortcuts import get_object_or_404
-# Create your views here.
+from posts.models import User 
+
+
+
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
 
@@ -20,11 +21,14 @@ class RegisterView(generics.CreateAPIView):
             status=status.HTTP_201_CREATED
         )
 
+
+
 class LoginView(APIView):
     def post(self, request):
         ser = LoginSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         return response.Response(ser.validated_data, status=status.HTTP_200_OK)
+
 
 class ProfileView(APIView):
     authentication_classes = [TokenAuthentication]
@@ -38,6 +42,7 @@ class ProfileView(APIView):
         ser.is_valid(raise_exception=True)
         ser.save()
         return response.Response(ser.data)
+
 
 class FollowUserView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -61,3 +66,15 @@ class UnfollowUserView(APIView):
 
         request.user.following.remove(target_user)
         return response.Response({'detail': f'You unfollowed {target_user.username}.'}, status=status.HTTP_200_OK)
+
+
+
+class UserListView(generics.GenericAPIView):
+    queryset = CoustomUser.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        users = self.get_queryset()
+        serializer = self.get_serializer(users, many=True)
+        return Response(serializer.data)
