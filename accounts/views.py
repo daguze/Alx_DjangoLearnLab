@@ -78,12 +78,9 @@ class UserListView(generics.GenericAPIView):
         users = self.get_queryset()
         serializer = self.get_serializer(users, many=True)
         return Response(serializer.data)
-class DummyUserListView(generics.GenericAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [permissions.AllowAny]
 
-    def get(self, request):
-        users = self.get_queryset()
-        serializer = self.get_serializer(users, many=True)
-        return Response(serializer.data)
+
+
+generics.GenericAPIView
+CustomUser.objects.all()
+return Response(serializer.data)
