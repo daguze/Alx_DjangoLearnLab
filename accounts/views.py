@@ -77,4 +77,4 @@ class UserListView(generics.GenericAPIView):
     def get(self, request):
         users = self.get_queryset()
         serializer = self.get_serializer(users, many=True)
-        return Response(serializer.data)
+        return Response()
