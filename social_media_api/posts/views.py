@@ -10,7 +10,7 @@ from rest_framework import viewsets, permissions, filters
 from rest_framework.pagination import PageNumberPagination
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
-
+from rest_framework import generics
 class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
@@ -48,7 +48,8 @@ class LikePostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        post = get_object_or_404(Post, pk=pk)
+        post = generics.get_object_or_404(Post, pk=pk)
+
         Like.objects.get_or_create(user=request.user, post=post)
         if not Like.objects.filter(post=post, user=request.user).exists():
             return Response({'detail': 'You already liked this post.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -68,7 +69,7 @@ class UnlikePostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        post = get_object_or_404(Post, pk=pk)
+        post = generics.get_object_or_404(Post, pk=pk)
         like = Like.objects.filter(post=post, user=request.user)
 
         if not like.exists():
